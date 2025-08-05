@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <math.h>
+
+#define x 8
+#define t 5
+
+float f(int a){
+    return(4*a - (a*a)/2);
+}
+
+int main(){
+    float u[x+1][t+1], c, k=0.125, h=1, al, us,ue ;
+    int i,j;
+
+    printf("enter the value of c^2: ");
+    scanf("%f",&c);
+    
+    al = c * k / pow(h,2);
+    
+    printf("enter the value of u(0,t), u(8,t): ");
+    scanf("%f%f",&us,&ue);
+    
+    for(j=0; j<=t; j++){
+        u[0][j] = us;
+        u[x][j] = ue;
+    }
+
+    for(i=0; i<x; i++){
+        u[i][0] = f(i);
+    }
+
+    for(j=0; j<t; j++){
+        for(i=1; i<x; i++){
+            u[i][j+1] = al*( u[i-1][j] + u[i+1][j] ) + (1 - 2*al)*u[i][j];
+        }
+    }
+
+    printf("the value of u(i,j) are:\n");
+    for(j=0; j<t; j++){
+        for(i=0; i<x; i++){
+            printf("%.4f\t",u[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+
+
+
+
+// *****OUTPUT*****
+// Enter the square value of c: 4
+// Enter the value of u(0,t): 0.0
+// The value of u(8,t): 0.0
+// the value of u(i,j) are
+
+// 0.0000   4.0000  6.0000	8.0000	8.0000	8.0000	6.0000	4.0000
+// 0.0000  	3.0000	6.0000	7.0000	8.0000	7.0000	6.0000	3.0000
+// 0.0000	  3.0000	5.0000	7.0000	7.0000	7.0000	5.0000	3.0000
+// 0.0000  	2.5000	5.0000	6.0000	7.0000	6.0000	5.0000	2.5000
+// 0.0000  	2.5000	4.2500	6.0000	6.0000	6.0000	4.2500	2.5000
