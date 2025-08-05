@@ -1,0 +1,81 @@
+#include <stdio.h>
+#include <math.h>
+
+float f(float x, float y);
+float rk4(float x, float y, float h);
+
+int main(){
+    float x0, y0, xn, h, y1, y2, y3, y4, yold, yp, yc;
+    float x1,x2,x3,x4,f1,f2,f3,eps=0.00001;
+
+    printf("enter the initial values of x, y: ");
+    scanf("%f%f",&x0,&y0);
+    
+    printf("enter the last value of x: ");
+    scanf("%f",&xn);
+    
+    printf("enter the step length h: ");
+    scanf("%f",&h);
+
+    x1=x0+h;
+    x2=x1+h;
+    x3=x2+h;
+
+    y1=rk4(x0,y0,h);
+    y2=rk4(x1,y1,h);
+    y3=rk4(x2,y2,h);
+
+    f1=f(x1,y1);
+    f2=f(x2,y2);
+    f3=f(x3,y3);
+
+    printf("x-value  y-value\n");
+    for(x4=x3+h; x4<=xn; x4+=h){
+        yp = y0 + 4*h/3*(2*f1 -f2 + 2*f3);
+        yold = yp;
+        yc = yp;
+
+        do{
+            yold = yc;
+            yc = y2 + h/3*(f2 + 4*f3 + f(x4,yold));
+        }while(fabs(yc-yold)>eps);
+
+        printf("%.4f  %.5f\n",x4,yc);
+        y0=y1;
+        y1=y2;
+        y2=y3;
+        y3=yc;
+
+        f1=f2;
+        f2=f3;
+        f3=f(x4,yc);
+    }
+}
+
+float f(float x, float y){
+    return(2*x + y*y);
+}
+
+float rk4(float x, float y, float h){
+    float k1, k2, k3, k4;
+    k1 = h*f(x,y);
+    k2 = h*f(x+h/2, y+k1/2);
+    k3 = h*f(x+h/2, y+k2/2);
+    k4 = h*f(x+h, y+k3);
+    y += (k1 + 2*k2 + 2*k3 + k4)/6;
+    return(y);
+}
+
+
+
+
+
+// ******OUTPUT******
+// Enter the initial value of x and y: 0, 1
+// Enter the last value of x: 0.7
+// Enter the step length h: 0.1
+// x- value		 y-value
+
+// 0.4000		1.91497
+// 0.5000		2.48207
+// 0.6000		3.45698
