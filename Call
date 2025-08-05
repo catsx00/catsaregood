@@ -1,0 +1,459 @@
+.......................ROMBERG INTEGRATION...............................
+
+#include <stdio.h>
+#include <math.h>
+
+float f(float x);
+float trap(float a, float h, int n);
+
+int main(){
+    float a,b,h,eps = 0.00001, error=1, I[10][10];
+    int n=1, j=0, k, l, maxrow;
+
+    printf("enter the lower & upper limits: ");
+    scanf("%f%f",&a,&b);
+
+    printf("enter the maximum number of row to be computed: ");
+    scanf("%d",&maxrow);
+
+    h=b-a;
+    I[0][0] = h/2*(f(a) + f(b));
+
+    while((error>eps) && (j<maxrow)){
+        j++;
+        h/=2;
+        n*=2;
+        I[j][0] = trap(a,h,n);
+
+        for(k=1; k<=j; k++){
+            I[j][k] = I[j][k-1] + ( I[j][k-1] - I[j-1][k-1] )/ (pow(4,k)-1);
+        }
+
+        for(l=0; l<=j; l++){
+            printf("\t %f\t",I[j][l]);
+        }
+        printf("\n");
+        error = fabs(I[j-1][j-1] - I[j][j]);
+    }
+
+    if(error<eps){
+        printf("\nThe value of the integration is %f",I[j][j]);
+    }else{
+        printf("The result does not achieve the desired accuracy"); 
+        printf("\nthe best approximation is %f ", I[j][j]);
+    }
+}
+
+float f(float x){
+    return(x*exp(x));
+}
+
+float trap(float a, float h, int n){
+    float sum=0;
+    for(int i=1; i<n; i++){
+        sum += f(a+ i*h);
+    }
+    sum = h/2*(f(a)+f(a+n*h) + 2*sum );
+    return (sum);
+}
+
+
+
+
+
+// ******OUTPUT******
+// Enter the limits a and b: 0, 1
+// Enter max. number of rows to be computed: 4
+// Romberg integration table
+// 1.091751	    1.002621
+// 1.023064 	1.000169 	1.000005
+// 1.005774 	1.000011 	1.000000 	1.000000
+
+// The value of the integration is 1.000000
+
+
+
+
+
+
+
+
+
+.................................GAUSS SEIDAL...............................
+
+#include <stdio.h>
+#include <math.h>
+
+int main(){
+    float a[10][10], b[10], x[10], xn[10], eps = 0.000001, sum;
+    int i, j, n, flag;
+
+    printf("enter the no of variable: ");
+    scanf("%d",&n);
+
+    printf("enter the coefficient row-wise\n");
+    for ( i = 1; i <= n; i++)
+    for ( j = 1; j <= n; j++)
+    scanf("%f",&a[i][j]);
+    
+    printf("enter the right hand vector\n");
+    for ( i = 1; i <= n; i++)
+    scanf("%f",&b[i]);
+
+    for ( i = 1; i <= n; i++)
+    x[i]=0;
+    
+    do{
+        for(i=1; i<=n; i++){
+            sum=b[i];
+            for ( j = 1; j <= n; j++)
+            {
+                if(i>j)
+                sum -= a[i][j]*xn[j];
+                if(j>i)
+                sum -= a[i][j]*x[j];
+
+                xn[i] = sum/a[i][i];
+            }
+        }
+
+        flag=0;
+        for(i=1; i<=n; i++){
+            if(fabs(x[i]-xn[i])>eps)
+            flag=1;
+        }
+
+        if(flag==1){
+            for(i=1; i<=n; i++)
+            x[i]=xn[i];
+        }
+
+    }while(flag==1);
+    
+    printf("the solution is: \n");
+    for(i=1; i<=n; i++)
+    printf("%f\t",xn[i]);
+        
+}
+
+
+
+
+// ******OUTPUT****** 
+// Enter the no of variables: 3 
+// Enter the co efficient row wise 
+// 8    1  -1   1   -7    2    2    1   9 
+// Enter the right-hand vector 
+// 8   -4   12 
+
+// solution is 
+// 1.000000  1.000000  1.000000 
+
+
+
+
+
+
+
+
+......................................RUNGE KUTTA...........................................
+
+#include <stdio.h>
+#include <math.h>
+
+float f(float x, float y, float z);
+float g(float x, float y, float z);
+
+int main(){
+
+    float x0,y0,z0,x,y,z,xn,h,k1,k2,k3,k4,n1,n2,n3,n4;
+
+    printf("enter the initial values of x, y, z: ");
+    scanf("%f%f%f",&x0,&y0,&z0);
+    
+    printf("enter the last value of x: ");
+    scanf("%f",&xn);
+    
+    printf("enter the step length h: ");
+    scanf("%f",&h);
+
+    y=y0;
+    z=z0;
+
+    printf("x value\t y value\t z value\n");
+    for(x= x0; x< xn; x +=h){
+        k1 = h*f(x,y,z);
+        n1 = h*g(x,y,z);
+        k2 = h*f(x+h/2, y+k1/2, z+n1/2);
+        n2 = h*g(x+h/2, y+k1/2, z+n1/2);
+        k3 = h*f(x+h/2, y+k2/2, z+n2/2);
+        n3 = h*g(x+h/2, y+k2/2, z+n2/2);
+        k4 = h*f(x+h, y+k3, z+n3);
+        n4 = h*g(x+h, y+k3, z+n3);
+        y += (k1+2*k2+2*k3+k4)/6;
+        z += (n1+2*n2+2*n3+n4)/6;
+        printf("%f\t%f\t%f\n",x+h,y,z);
+    }  
+
+}
+
+float f(float x, float y, float z){
+    return(z);
+}
+
+float g(float x, float y, float z){
+    return(0.5 * (45 * exp(2 * x) + 5 * z + 3 * y));
+}
+
+
+
+
+
+// ******OUTPUT******
+// Enter the initial value of x,y and z: 0, 2, 1
+// Enter the last value of x: 0.1
+// Enter the step length: 0.1
+
+// x value  	y value  	z value
+// 0.100000 	2.261217 	4.459068
+
+
+
+
+
+
+
+
+
+....................................PARABOLIC PDE..............................................
+
+#include <stdio.h>
+#include <math.h>
+
+#define x 8
+#define t 5
+
+float f(int a){
+    return(4*a - (a*a)/2);
+}
+
+int main(){
+    float u[x+1][t+1], c, k=0.125, h=1, al, us,ue ;
+    int i,j;
+
+    printf("enter the value of c^2: ");
+    scanf("%f",&c);
+    
+    al = c * k / pow(h,2);
+    
+    printf("enter the value of u(0,t), u(8,t): ");
+    scanf("%f%f",&us,&ue);
+    
+    for(j=0; j<=t; j++){
+        u[0][j] = us;
+        u[x][j] = ue;
+    }
+
+    for(i=0; i<x; i++){
+        u[i][0] = f(i);
+    }
+
+    for(j=0; j<t; j++){
+        for(i=1; i<x; i++){
+            u[i][j+1] = al*( u[i-1][j] + u[i+1][j] ) + (1 - 2*al)*u[i][j];
+        }
+    }
+
+    printf("the value of u(i,j) are:\n");
+    for(j=0; j<t; j++){
+        for(i=0; i<x; i++){
+            printf("%.4f\t",u[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+
+
+
+
+// *****OUTPUT*****
+// Enter the square value of c: 4
+// Enter the value of u(0,t): 0.0
+// The value of u(8,t): 0.0
+// the value of u(i,j) are
+
+// 0.0000   4.0000  6.0000	8.0000	8.0000	8.0000	6.0000	4.0000
+// 0.0000	  3.0000	6.0000	7.0000	8.0000	7.0000	6.0000	3.0000
+// 0.0000	  3.0000	5.0000	7.0000	7.0000	7.0000	5.0000	3.0000
+// 0.0000	  2.5000	5.0000	6.0000	7.0000	6.0000	5.0000	2.5000
+// 0.0000	  2.5000	4.2500	6.0000	6.0000	6.0000	4.2500	2.5000
+
+
+
+
+
+
+
+
+
+ .......................................HYPERBOLIC PDE............................................
+
+#include <stdio.h>
+#include <math.h>
+
+#define x 5
+#define t 8
+
+float f(float a){
+    return(0.5*sin(a));
+}
+
+int main(){
+
+    float u[x+1][t+1],c,ut,ue;
+    int i,j;
+
+    printf("enter the value of c: ");
+    scanf("%f",&c);
+
+    printf("enter the value of ut and ue: ");
+    scanf("%f%f",&ut,&ue);
+
+    for(j=0; j<=t; j++){
+        u[0][j]=ut;
+        u[x][j]=ue;
+
+    }
+
+    for(i=1; i<x; i++){
+        u[i][0]=f(3.14*i*0.2);
+    }
+
+    for(i=1; i<x; i++){
+        u[i][1]=0.125*(u[i-1][0] + u[i+1][0]) + 0.75*u[i][0];
+    }
+
+    for(j=1; j<t; j++){
+        for(i=1; i<x; i++){
+            u[i][j+1] = c*c*( u[i-1][j] + u[i+1][j] ) + 2*(1-c*c)*u[i][j] - u[i][j-1];
+        }
+    }
+
+    printf("the value of u[i][j] are: \n");
+    for(j=0; j<=t-3; j++){
+        for(i=0; i<=x; i++){
+            printf("%.4f\t",u[i][j]);
+        }
+        printf("\n");
+    }
+
+}
+
+
+
+
+
+// ******OUTPUT******
+// Enter the value of c: 0.5
+// Enter the value of ut and ue: 0  0
+// the value of u[i][j] are:
+
+// 0.0000	  0.2938 	0.4754 	0.4757 	0.2944	0.0000
+// 0.0000	  0.2798 	0.4528	0.4530 	0.2803 	0.0000
+// 0.0000 	0.2391 	0.3869	0.3871 	0.2392 	0.0000
+// 0.0000 	0.1755 	0.2841 	0.2841 	0.1754 	0.0000
+// 0.0000	  0.0953	0.1542 	0.1540 	0.0948 	0.0000
+// 0.0000	  0.0059 	0.0095 	0.0091 	0.0054 	0.0000
+
+
+
+
+
+
+
+
+
+.......................................Milne’s method.....................................
+
+#include <stdio.h>
+#include <math.h>
+
+float f(float x, float y);
+float rk4(float x, float y, float h);
+
+int main(){
+    float x0, y0, xn, h, y1, y2, y3, y4, yold, yp, yc;
+    float x1,x2,x3,x4,f1,f2,f3,eps=0.00001;
+
+    printf("enter the initial values of x, y: ");
+    scanf("%f%f",&x0,&y0);
+    
+    printf("enter the last value of x: ");
+    scanf("%f",&xn);
+    
+    printf("enter the step length h: ");
+    scanf("%f",&h);
+
+    x1=x0+h;
+    x2=x1+h;
+    x3=x2+h;
+
+    y1=rk4(x0,y0,h);
+    y2=rk4(x1,y1,h);
+    y3=rk4(x2,y2,h);
+
+    f1=f(x1,y1);
+    f2=f(x2,y2);
+    f3=f(x3,y3);
+
+    printf("x-value  y-value\n");
+    for(x4=x3+h; x4<=xn; x4+=h){
+        yp = y0 + 4*h/3*(2*f1 -f2 + 2*f3);
+        yold = yp;
+        yc = yp;
+
+        do{
+            yold = yc;
+            yc = y2 + h/3*(f2 + 4*f3 + f(x4,yold));
+        }while(fabs(yc-yold)>eps);
+
+        printf("%.4f  %.5f\n",x4,yc);
+        y0=y1;
+        y1=y2;
+        y2=y3;
+        y3=yc;
+
+        f1=f2;
+        f2=f3;
+        f3=f(x4,yc);
+    }
+}
+
+float f(float x, float y){
+    return(2*x + y*y);
+}
+
+float rk4(float x, float y, float h){
+    float k1, k2, k3, k4;
+    k1 = h*f(x,y);
+    k2 = h*f(x+h/2, y+k1/2);
+    k3 = h*f(x+h/2, y+k2/2);
+    k4 = h*f(x+h, y+k3);
+    y += (k1 + 2*k2 + 2*k3 + k4)/6;
+    return(y);
+}
+
+
+
+
+
+// ******OUTPUT******
+// Enter the initial value of x and y: 0  1
+// Enter the last value of x: 0.7
+// Enter the step length h: 0.1
+// x- value		 y-value
+
+// 0.4000		1.91497
+// 0.5000		2.48207
+// 0.6000		3.45698
