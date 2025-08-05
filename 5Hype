@@ -1,0 +1,66 @@
+#include <stdio.h>
+#include <math.h>
+
+#define x 5
+#define t 8
+
+float f(float a){
+    return(0.5*sin(a));
+}
+
+int main(){
+
+    float u[x+1][t+1],c,ut,ue;
+    int i,j;
+
+    printf("enter the value of c: ");
+    scanf("%f",&c);
+
+    printf("enter the value of ut and ue: ");
+    scanf("%f%f",&ut,&ue);
+
+    for(j=0; j<=t; j++){
+        u[0][j]=ut;
+        u[x][j]=ue;
+
+    }
+
+    for(i=1; i<x; i++){
+        u[i][0]=f(3.14*i*0.2);
+    }
+
+    for(i=1; i<x; i++){
+        u[i][1]=0.125*(u[i-1][0] + u[i+1][0]) + 0.75*u[i][0];
+    }
+
+    for(j=1; j<t; j++){
+        for(i=1; i<x; i++){
+            u[i][j+1] = c*c*( u[i-1][j] + u[i+1][j] ) + 2*(1-c*c)*u[i][j] - u[i][j-1];
+        }
+    }
+
+    printf("the value of u[i][j] are: \n");
+    for(j=0; j<=t-3; j++){
+        for(i=0; i<=x; i++){
+            printf("%.4f\t",u[i][j]);
+        }
+        printf("\n");
+    }
+
+}
+
+
+
+
+
+// ******OUTPUT******
+// Enter the value of c: 0.5
+// Enter the value of ut and ue: 0, 0
+// the value of u[i][j] are:
+
+// 0.0000	0.2938 	0.4754 	0.4757 	0.2944	0.0000
+// 0.0000	0.2798 	0.4528	0.4530 	0.2803 	0.0000
+// 0.0000 	0.2391 	0.3869	0.3871 	0.2392 	0.0000
+// 0.0000 	0.1755 	0.2841 	0.2841 	0.1754 	0.0000
+// 0.0000	0.0953	0.1542 	0.1540 	0.0948 	0.0000
+// 0.0000	0.0059 	0.0095 	0.0091 	0.0054 	0.0000
